@@ -91,7 +91,7 @@ app.post('/signin', async (req, res) => {
         res.render("lawyerpage", { user_name: `${foundlist.name} ${foundlist["last-name"]}`, emailInvalid: false });
       } else {
         console.log('Incorrect password entered');
-        res.render("signin", { emailInvalid: false, passInvalid: true });
+        res.render("", { emailInvalid: false, passInvalid: true });
       }
     }
   } catch (err) {
@@ -116,6 +116,10 @@ app.post("/signup", async (req, res) => {
     } else {
       const lawyer_details = new LawyerDetails_schema(lawyerData);
       await lawyer_details.save();
+      const user_detail = new Lawyer_schema({
+        ...lawyer_details.toObject(),
+        caseId: ""
+      });
       console.log("Lawyer created successfully!");
       req.session.userEmail = lawyerData.email; 
       res.cookie('userEmail', lawyerData.email); 
@@ -136,30 +140,25 @@ app.post("/lawyerpage", async (req, res) => {
     const case_file = new Case_schema(case_details);
 
     const oppositionLawyerExists = await LawyerDetails_schema.findOne({ email: case_details.email });
-
+    
+    const user = await LawyerDetails_schema.findOne({email: req.cookies.userEmail });
     if (oppositionLawyerExists) {
-      const opposition_lawyer = new Lawyer_schema(case_details);
-      const user = await LawyerDetails_schema.findOne({email: req.cookies.userEmail });
+      await case_file.save()
+      
+      // const opposition_lawyer = new Lawyer_schema(case_details);
 
-      const user_detail = new Lawyer_schema({
-        ...user.toObject(),
-        _id: case_details.caseId,
-        caseId: case_details.caseId
-      });
-
-      console.log(user);
-
-      case_file.save()
-      .then(() => {
-        return opposition_lawyer.save();
-      })
-      .then(() => {
-        return user_detail.save();
-      })
-      .then(() => {
-        console.log(`Case filed with id :${case_file._id}`);
-        res.redirect("/court");
-      });
+      // const user_detail = new Lawyer_schema({
+      //   ...user.toObject(),
+      //   // _id: case_details.caseId,
+      //   caseId: case_details.caseId
+      // });
+      await Lawyer_schema.findOneAndUpdate({email: req.cookies.userEmail },{caseId: case_file.caseId})
+      
+      // console.log(user);
+      await Lawyer_schema.findOneAndUpdate({email: case_details.email },{caseId: case_file.caseId})
+      console.log(`Case filed with id :${case_file._id}`);
+      res.redirect("/court");
+      
     } else {
       res.render("lawyerpage", { user_name: `${user.name} ${user["last-name"]}`, emailInvalid: true });
     }
@@ -185,6 +184,9 @@ app.get("/court", async (req, res) => {
   console.log(`email in cookie: ${email}`)
   const lawyerdata = await Lawyer_schema.findOne({email: email});
   const caseId = lawyerdata.caseId;
+  if (caseId==""){
+    res.render("lawyerpage", { user_name: `${lawyerData.name} ${lawyerData["last-name"]}`, emailInvalid: false });
+  }
   const caseDetails = await Case_schema.findOne({ caseId: caseId });
   let chat = await chatSchema.findOne({ caseId: caseId });
 
