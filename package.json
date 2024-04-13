@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Cyber-demon01/law-firm.git"
+    "url": "git+https://github.com/iamthehimansh/Aarohan.git"
   },
   "author": "Abhijeet kumar",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Cyber-demon01/law-firm/issues"
+    "url": "https://github.com/iamthehimansh/Aarohan/issues"
   },
-  "homepage": "https://github.com/Cyber-demon01/law-firm#readme",
+  "homepage": "https://github.com/iamthehimansh/Aarohan#readme",
   "dependencies": {
     "axios": "^1.4.0",
     "body-parser": "^1.20.2",
